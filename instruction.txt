@@ -1,0 +1,259 @@
+Developer API
+This page will help you get started with API.
+
+This document will provide instructions on how to quickly integrate SMS messaging services into various solutions by using HTTP application programming interface (HTTP API). The HTTP API can be used for sending SMS messages, making Number Context (number validation) requests and receiving inbound SMS messages sent from mobile phones.
+
+API is based on REST standards, enabling you to use your browser for accessing URLs. In order to interact with our API, any HTTP client in any programming language can be used.
+
+Base URL
+Submit all requests to the base URL. All the requests are submitted thorough HTTP POST method.
+
+Plain Text
+https://messaging-service.co.tz
+Content-Type & Accept header
+API supports JSON and XML Content-Types and Accept criteria that should be specified in the header. If the Content-Type is not specified you will receive a General error. Depending which Accept type is chosen in the deader for the request, the same one will be applied in the response.
+
+Content-Type: application/json
+
+Accept header: application/json
+
+Authorization
+We support basic authorization using a username and password with Base64 encoding variation RFC2045-MIME.
+
+Username and password are combined into a string username:password.
+
+The resulting string is encoded using the RFC2045-MIME variant of Base64.
+
+The authorization method and a space, like this: "Basic ", are put before the encoded string.
+
+EXAMPLE
+
+Username: Aladdin
+
+Password: open sesame
+
+Base64 encoded string: QWxhZGRpbjpvcGVuIHNlc2FtZQ==
+
+Authorization header: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==
+
+Gerenate your Base64 encoded string here
+
+Response status and error codes
+While using our API you may encounter certain status and error codes that you need to understand or troubleshoot. This page contains a list of all codes with thorough descriptions and action steps you need to take in case you are looking for a resolution of the problem.
+
+HTTP status codes
+Every HTTP transaction has a status code sent back by the server to define how the server handled the transaction. Most common statuses you may have encountered are 200 OK and 404 Not Found
+
+Learn more about HTTP status codes here
+
+API Status codes
+Besides standard HTTP status code, status object may be returned as part of the API response message, delivery report or message log.
+
+Status json object example:
+
+Plain Text
+{  
+   "groupId":3,
+   "groupName":"DELIVERED",
+   "id":5,
+   "name":"DELIVERED_TO_HANDSET",
+   "description":"Message delivered to handset"
+}
+General status codes
+
+PENDING (group id: 18) - general status codes
+
+Message has been processed and sent to the next instance i.e. mobile operator.
+
+Id	Status
+50	PENDING_WAITING_DELIVERY - Message has been processed and sent to the next instance i.e. mobile operator with request acknowledgment from their platform. Delivery report has not yet been received, and is awaited thus the status is still pending.
+51	ENROUTE (SENT) - Message has been processed and sent to the next instance i.e. mobile operator.
+52	PENDING_ACCEPTED - Message has been accepted and processed, and is ready to be sent to the next instance i.e. operator.
+DELIVERY (group id: 20) - general status codes
+
+Delivery report received from mobile operators.
+
+Id	Status
+73	DELIVERED - The message was successfully delivered.
+74	EXPIRED - The SMSC was unable to deliver the message in a specified amount of time.For instance when the phone was turned off.
+75	DELETED - The message was deleted.
+76	UNDELIVERABLE - The SMS was unable to deliver the message.For instance, when the number does not exist. This status is also returned when SMSC does not send accurate status.
+77	ACCEPTED - The SMS was accepted and will be send.
+78	UNKNOWN - Unknown error occured.
+79	REJECTED - The message was rejected.The provider could have blocked phonenumbers in this range.
+80	SKIPPED - The message was skipped.
+REJECTED (group id: 19) - general status codes
+
+Message has been received, but has either been rejected by our system, or the operator has reverted Rejected as final status.
+
+View More
+Id	Status
+53	REJECTED_NETWORK - Message has been received, but the network is either out of our coverage or not setup on your account. Your account manager can inform you on the coverage status or setup the network in question.
+54	REJECTED_PREFIX_MISSING - Message has been received, but has been rejected as the number is not recognized due to either incorrect number prefix or number length. This information is different for each network and is regularly updated.
+55	REJECTED_DND - Message has been received, and rejected due to the user being subscribed to DND (Do Not Disturb) services, disabling any service traffic to their number.
+56	REJECTED_SOURCE - Your account is set to accept only registered sender ID-s while the sender ID defined in the request has not been registered on your account.
+57	REJECTED_NOT_ENOUGH_CREDITS - Your account is out of credits for further submission - please top up your account. For further assistance in topping up or applying for online account topup service you may contact your account manager.
+58	REJECTED_SENDER - The sender ID has been blacklisted on your account - please remove the blacklist on your account or contact Support for further assistance.
+59	REJECTED_DESTINATION - The destination number has been blacklisted either at the operator request or on your account - please contact Support for more information.
+60	REJECTED_PREPAID_PACKAGE_EXPIRED - Account credits have been expired past their validity period - please topup your subaccount with credits to extend the validity period.
+61	REJECTED_DESTINATION_NOT_REGISTERED - Your account has been setup for submission only to a single number for testing purposes - kindly contact your manager to remove the limitation.
+62	REJECTED_ROUTE_NOT_AVAILABLE - Mesage has been received on the system, however your account has not been setup to send messages i.e. no routes on your account are available for further submission. Your account manager will be able to setup your account based on your preference.
+63	REJECTED_FLOODING_FILTER - Message has been rejected due to a anti-flooding mechanism. By default, a single number can only receive 20 varied messages and 6 identical messages per hour. If there is a requirement, the limitation can be extended per account on request to your account manager.
+64	REJECTED_SYSTEM_ERROR - The request has been rejected due to an expected system system error, please retry submission or contact our technical support team for more details.
+65	REJECTED_DUPLICATE_MESSAGE_ID -The request has been rejected due to a duplicate message ID specified in the submit request, while message ID-s should be a unique value
+66	REJECTED_INVALID_UDH - Message has been received, while our system detected the message was formatted incorrectly because of either an invalid ESM class parameter (fully featured binary message API method) or an inaccurate amount of characters when using esmclass:64 (UDH). For more information feel free to visit the below articles or contact our Support team for clarification. https://en.wikipedia.org/wiki/User_Data_Header, https://en.wikipedia.org/wiki/Concatenated_SMS
+67	REJECTED_MESSAGE_TOO_LONG - Message has been received, but the total message length is more than 25 parts or message text which exceeds 4000 bytes as per our system limitation.
+68	MISSING_TO - The request has been received, however the "to" parameter has not been set or it is empty, i.e. there must be valid recipients to send the message.
+69	REJECTED_INVALID_DESTINATION - The request has been received, however the destination is invalid - the number prefix is not correct as it does not match a valid number prefix by any mobile operator. Number length is also taken into consideration in verifying number number validity.
+Test Mode
+You can make a request just to test our API for your development environment, and get responses and understanding them. This feature will send you only dummy data generate from your request. No charges are involved in testing mode, it is free and your current sms balance will not be reducted for the requests you send to the test APIs.
+
+TEST APIs url
+
+For single message text request:
+
+POST https://messaging-service.co.tz/api/sms/v1/test/text/single
+
+For multiple messages text request:
+
+POST https://messaging-service.co.tz/api/sms/v1/test/text/multi
+
+Further instructions are on Send SMS Section
+
+Send Sms
+In a few simple steps, we will explain how to send an SMS using Nextbyte HTTPS API.
+
+Firstly, you'll need a valid Nextbyte account. When you sign up for the account, you will set a username and password. Next, your username and password has to be encoded in base64 like described in the Authorization Section:
+
+The message will be sent only to a valid phone number (numbers), written in international format e.g.255738234345. We strongly recommend using the E.164 number formatting. E.164 numbers are internationally standardized to a fifteen digit maximum length. Phone numbers are usually prefixed with + (plus sign), followed by a country code, network code and the subscriber number. Phone numbers that are not E.164 formatted may work, depending on the handset or network.
+
+When sending a message you can specify reference value 
+which associates the API request payload with your data.
+ This is very useful when fetching delivery reports and logs.
+  This is also useful when at any circumstance the requester does 
+  not receive a response from the API endpoint and wants to synchronise 
+  information at some point later.
+
+
+
+  
+POST
+Recharge customer
+https://messaging-service.co.tz/api/reseller/v1/sub_customer/recharge
+To recharge your customer you are required to specify
+
+your customer email account which has been registered with the customer
+
+and smscount number of sms you want to recharge a customer.
+
+HEADERS
+Authorization
+Basic aW0yM246MTIzNDU2
+
+Accept
+application/json
+
+Content-Type
+application/json
+
+Body
+raw
+{"email": "example@email.com", "smscount":5000}
+Example Request
+Recharge customer
+curl
+curl --location 'https://messaging-service.co.tz/api/reseller/v1/sub_customer/recharge' \
+--header 'Authorization: Basic aW0yM246MTIzNDU2' \
+--header 'Accept: application/json' \
+--header 'Content-Type: application/json' \
+--data-raw '{"email": "example@email.com", "smscount":5000}'
+200 OK
+Example Response
+Body
+Headers (9)
+json
+{
+  "success": true,
+  "status": 200,
+  "message": "Transaction completed successfully",
+  "result": {
+    "Customer": "example@email.com",
+    "Sms transferred": 5000,
+    "Your sms balance": 450000
+  }
+}
+POST
+Deduct customer
+https://messaging-service.co.tz/api/reseller/v1/sub_customer/deduct
+To deduct your customer you are required to specify
+
+your customer email account which has been registered with the customer
+
+and smscount number of sms you want to deduct from a customer account.
+
+HEADERS
+Authorization
+Basic aW0yM246MTIzNDU2
+
+Accept
+application/json
+
+Content-Type
+application/json
+
+Body
+raw
+{"email": "example@email.com", "smscount":2000}
+Example Request
+Deduct customer
+curl
+curl --location 'https://messaging-service.co.tz/api/reseller/v1/sub_customer/deduct' \
+--header 'Authorization: Basic aW0yM246MTIzNDU2' \
+--header 'Accept: application/json' \
+--header 'Content-Type: application/json' \
+--data-raw '{"email": "example@email.com", "smscount":2000}'
+200 OK
+Example Response
+Body
+Headers (9)
+json
+{
+  "success": true,
+  "status": 200,
+  "message": "Transaction completed successfully",
+  "result": {
+    "Customer": "example@email.com",
+    "Sms deducted": 2000,
+    "Your sms balance": 470000,
+    "Customer sms balance": 3000
+  }
+}
+GET
+Get sms balance
+https://messaging-service.co.tz/api/sms/v1/balance
+HEADERS
+Authorization
+Basic c3ViY3VzdG9tZXI6MTIzNDU2
+
+Content-Type
+application/json
+
+Accept
+application/json
+
+Example Request
+Get sms balance
+curl
+curl --location 'https://messaging-service.co.tz/api/sms/v1/balance' \
+--header 'Authorization: Basic c3ViY3VzdG9tZXI6MTIzNDU2' \
+--header 'Content-Type: application/json' \
+--header 'Accept: application/json' \
+--data ''
+200 OK
+Example Response
+Body
+Headers (11)
+json
+{
+  "sms_balance": 5
+}
