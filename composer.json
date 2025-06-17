@@ -11,6 +11,10 @@
         "tanzania"
     ],
     "homepage": "https://github.com/VaraAI/varasms",
+    "support": {
+        "issues": "https://github.com/VaraAI/varasms/issues",
+        "source": "https://github.com/VaraAI/varasms"
+    },
     "license": "MIT",
     "autoload": {
         "psr-4": {
@@ -64,6 +68,6 @@
             "pestphp/pest-plugin": true
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 } 
