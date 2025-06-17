@@ -1,5 +1,5 @@
 {
-    "name": "varasms/laravel-sms",
+    "name": "varaai/varasms",
     "description": "Laravel package for integrating with VaraSMS messaging service",
     "type": "library",
     "keywords": [
@@ -10,7 +10,7 @@
         "bulk sms",
         "tanzania"
     ],
-    "homepage": "https://github.com/varasms/laravel-sms",
+    "homepage": "https://github.com/VaraAI/varasms",
     "license": "MIT",
     "autoload": {
         "psr-4": {

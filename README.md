@@ -7,7 +7,7 @@ A Laravel package for integrating with the VaraSMS messaging service. This packa
 You can install the package via composer:
 
 ```bash
-composer require varasms/laravel-sms
+composer require varaai/varasms
 ```
 
 ## Configuration
