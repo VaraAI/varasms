@@ -21,10 +21,15 @@ class VaraSMSServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton('varasms', function ($app) {
+            $config = config('varasms');
             return new VaraSMSClient(
-                config('varasms.username'),
-                config('varasms.password'),
-                config('varasms.base_url', 'https://messaging-service.co.tz')
+                $config['base_url'] ?? 'https://messaging-service.co.tz',
+                [
+                    'auth_method' => $config['auth_method'] ?? 'basic',
+                    'username' => $config['username'],
+                    'password' => $config['password'],
+                    'token' => $config['token'],
+                ]
             );
         });
     }

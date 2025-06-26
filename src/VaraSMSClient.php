@@ -12,18 +12,30 @@ class VaraSMSClient
     protected $baseUrl;
     protected $auth;
 
-    public function __construct(string $username, string $password, string $baseUrl)
+    public function __construct(string $baseUrl, array $config = [])
     {
         $this->baseUrl = rtrim($baseUrl, '/');
-        $this->auth = base64_encode("$username:$password");
+        
+        $headers = [
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ];
+
+        if ($config['auth_method'] === 'token') {
+            if (empty($config['token'])) {
+                throw new \InvalidArgumentException('Authorization token is required when using token authentication.');
+            }
+            $headers['Authorization'] = "Bearer {$config['token']}";
+        } else {
+            if (empty($config['username']) || empty($config['password'])) {
+                throw new \InvalidArgumentException('Username and password are required when using basic authentication.');
+            }
+            $headers['Authorization'] = "Basic " . base64_encode("{$config['username']}:{$config['password']}");
+        }
         
         $this->client = new Client([
             'base_uri' => $this->baseUrl,
-            'headers' => [
-                'Authorization' => "Basic {$this->auth}",
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ],
+            'headers' => $headers,
         ]);
     }
 

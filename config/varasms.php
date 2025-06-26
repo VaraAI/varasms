@@ -3,16 +3,31 @@
 return [
     /*
     |--------------------------------------------------------------------------
+    | VaraSMS Authentication Method
+    |--------------------------------------------------------------------------
+    |
+    | Here you can specify which authentication method to use. Available options are:
+    | - 'basic' (username/password)
+    | - 'token' (authorization token)
+    |
+    */
+
+    'auth_method' => env('VARASMS_AUTH_METHOD', 'basic'),
+
+    /*
+    |--------------------------------------------------------------------------
     | VaraSMS API Credentials
     |--------------------------------------------------------------------------
     |
     | Here you may configure your VaraSMS API credentials. These credentials will
-    | be used to authenticate with the VaraSMS API service.
+    | be used to authenticate with the VaraSMS API service. You can either use
+    | username/password combination or an authorization token.
     |
     */
 
     'username' => env('VARASMS_USERNAME'),
     'password' => env('VARASMS_PASSWORD'),
+    'token' => env('VARASMS_TOKEN'),
 
     /*
     |--------------------------------------------------------------------------

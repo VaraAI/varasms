@@ -20,9 +20,19 @@ php artisan vendor:publish --provider="VaraSMS\Laravel\VaraSMSServiceProvider"
 
 Add the following environment variables to your `.env` file:
 
+For username/password authentication (default):
 ```env
+VARASMS_AUTH_METHOD=basic
 VARASMS_USERNAME=your_username
 VARASMS_PASSWORD=your_password
+VARASMS_SENDER_ID=your_sender_id
+VARASMS_BASE_URL=https://messaging-service.co.tz
+```
+
+Or for token-based authentication:
+```env
+VARASMS_AUTH_METHOD=token
+VARASMS_TOKEN=your_authorization_token
 VARASMS_SENDER_ID=your_sender_id
 VARASMS_BASE_URL=https://messaging-service.co.tz
 ```
