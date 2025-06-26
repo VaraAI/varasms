@@ -25,7 +25,7 @@ class VaraSMSClient
             if (empty($config['token'])) {
                 throw new \InvalidArgumentException('Authorization token is required when using token authentication.');
             }
-            $headers['Authorization'] = "Bearer {$config['token']}";
+            $headers['Authorization'] = "Basic " . base64_encode($config['token']);
         } else {
             if (empty($config['username']) || empty($config['password'])) {
                 throw new \InvalidArgumentException('Username and password are required when using basic authentication.');
