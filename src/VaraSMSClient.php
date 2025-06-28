@@ -40,25 +40,44 @@ class VaraSMSClient
     }
 
     /**
-     * Send a single SMS message
+     * Send a single SMS message to one or multiple recipients
      *
-     * @param string $to
-     * @param string $message
-     * @param string|null $senderId
-     * @param string|null $reference
+     * @param string|array $to Recipient phone number(s) starting with 255
+     * @param string $message The message to send
+     * @param string|null $senderId Custom sender ID
+     * @param string|null $reference Custom reference for the message
      * @return array
-     * @throws \Exception
+     * @throws \InvalidArgumentException|\Exception
      */
-    public function sendSMS(string $to, string $message, ?string $senderId = null, ?string $reference = null): array
+    public function sendSMS(string|array $to, string $message, ?string $senderId = null, ?string $reference = null): array
     {
         try {
-            $response = $this->client->post('/api/sms/v1/text/single', [
-                'json' => array_filter([
-                    'to' => $to,
-                    'message' => $message,
-                    'from' => $senderId ?? config('varasms.sender_id'),
-                    'reference' => $reference,
-                ]),
+            // Convert single recipient to array for consistent handling
+            $recipients = is_array($to) ? $to : [$to];
+
+            // Validate all phone numbers
+            foreach ($recipients as $recipient) {
+                if (!preg_match('/^255\d{9}$/', $recipient)) {
+                    throw new \InvalidArgumentException(
+                        "Invalid phone number format: {$recipient}. Must start with 255 followed by 9 digits"
+                    );
+                }
+            }
+
+            $payload = array_filter([
+                'from' => $senderId ?? config('varasms.sender_id'),
+                'to' => is_array($to) ? $to : $to, // Keep original format (string or array)
+                'text' => $message,
+                'reference' => $reference,
+            ]);
+
+            // Use test endpoint if test mode is enabled
+            $endpoint = config('varasms.test_mode', false)
+                ? '/api/sms/v1/test/text/single'
+                : '/api/sms/v1/text/single';
+
+            $response = $this->client->post($endpoint, [
+                'json' => $payload
             ]);
 
             return json_decode($response->getBody()->getContents(), true);
@@ -454,6 +473,76 @@ class VaraSMSClient
         } catch (GuzzleException $e) {
             Log::error('VaraSMS API Error: ' . $e->getMessage());
             throw new \Exception('Failed to schedule SMS: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send multiple messages to multiple destinations
+     *
+     * @param array $messages Array of message arrays, each containing:
+     *                       - to: string|array Recipients
+     *                       - text: string Message content
+     *                       - from: string|null (optional) Sender ID
+     * @param string|null $reference Global reference for all messages
+     * @return array
+     * @throws \InvalidArgumentException|\Exception
+     */
+    public function sendMultipleMessages(array $messages, ?string $reference = null): array
+    {
+        try {
+            // Validate messages structure
+            foreach ($messages as $message) {
+                if (!isset($message['to'], $message['text'])) {
+                    throw new \InvalidArgumentException(
+                        'Each message must contain "to" (string|array) and "text" (string) fields'
+                    );
+                }
+
+                // Convert single recipient to array
+                $recipients = is_array($message['to']) ? $message['to'] : [$message['to']];
+
+                // Validate all phone numbers
+                foreach ($recipients as $recipient) {
+                    if (!preg_match('/^255\d{9}$/', $recipient)) {
+                        throw new \InvalidArgumentException(
+                            "Invalid phone number format: {$recipient}. Must start with 255 followed by 9 digits"
+                        );
+                    }
+                }
+
+                // Ensure message text is not empty
+                if (empty($message['text'])) {
+                    throw new \InvalidArgumentException('Message text cannot be empty');
+                }
+            }
+
+            // Format messages with default sender ID if not provided
+            $formattedMessages = array_map(function ($message) {
+                return array_filter([
+                    'from' => $message['from'] ?? config('varasms.sender_id'),
+                    'to' => $message['to'],
+                    'text' => $message['text']
+                ]);
+            }, $messages);
+
+            $payload = array_filter([
+                'messages' => $formattedMessages,
+                'reference' => $reference
+            ]);
+
+            // Use test endpoint if test mode is enabled
+            $endpoint = config('varasms.test_mode', false)
+                ? '/api/sms/v1/test/text/multi'
+                : '/api/sms/v1/text/multi';
+
+            $response = $this->client->post($endpoint, [
+                'json' => $payload
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (GuzzleException $e) {
+            Log::error('VaraSMS API Error: ' . $e->getMessage());
+            throw new \Exception('Failed to send multiple messages: ' . $e->getMessage());
         }
     }
 } 

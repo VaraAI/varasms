@@ -3,53 +3,36 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | VaraSMS Authentication Method
+    | VaraSMS Configuration
     |--------------------------------------------------------------------------
     |
-    | Here you can specify which authentication method to use. Available options are:
-    | - 'basic' (username/password)
-    | - 'token' (authorization token)
+    | This file contains the configuration settings for the VaraSMS package.
     |
     */
-
-    'auth_method' => env('VARASMS_AUTH_METHOD', 'basic'),
 
     /*
     |--------------------------------------------------------------------------
-    | VaraSMS API Credentials
+    | Authentication Settings
     |--------------------------------------------------------------------------
     |
-    | Here you may configure your VaraSMS API credentials. These credentials will
-    | be used to authenticate with the VaraSMS API service. You can either use
-    | username/password combination or an authorization token.
+    | Configure your authentication method and credentials here.
+    | Supported methods: 'basic' (username/password) or 'token'
     |
     */
-
+    'auth_method' => env('VARASMS_AUTH_METHOD', 'basic'),
     'username' => env('VARASMS_USERNAME'),
     'password' => env('VARASMS_PASSWORD'),
     'token' => env('VARASMS_TOKEN'),
 
     /*
     |--------------------------------------------------------------------------
-    | VaraSMS API Base URL
+    | API Settings
     |--------------------------------------------------------------------------
     |
-    | This is the base URL for the VaraSMS API. You can change this if you need
-    | to use a different endpoint or if you're using the test environment.
+    | Configure your API settings here.
     |
     */
-
     'base_url' => env('VARASMS_BASE_URL', 'https://messaging-service.co.tz'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Default Sender ID
-    |--------------------------------------------------------------------------
-    |
-    | This is the default sender ID that will be used when sending SMS messages.
-    | You can override this when sending individual messages.
-    |
-    */
-
     'sender_id' => env('VARASMS_SENDER_ID'),
+    'test_mode' => env('VARASMS_TEST_MODE', false),
 ]; 

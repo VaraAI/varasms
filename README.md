@@ -27,6 +27,7 @@ VARASMS_USERNAME=your_username
 VARASMS_PASSWORD=your_password
 VARASMS_SENDER_ID=your_sender_id
 VARASMS_BASE_URL=https://messaging-service.co.tz
+VARASMS_TEST_MODE=false  # Set to true to use test endpoints
 ```
 
 Or for token-based authentication:
@@ -35,6 +36,16 @@ VARASMS_AUTH_METHOD=token
 VARASMS_TOKEN=your_authorization_token
 VARASMS_SENDER_ID=your_sender_id
 VARASMS_BASE_URL=https://messaging-service.co.tz
+VARASMS_TEST_MODE=false  # Set to true to use test endpoints
+```
+
+### Test Mode
+
+When `VARASMS_TEST_MODE` is set to `true`, all API calls will be directed to the test endpoints. This is useful for development and testing without sending actual SMS messages.
+
+Example test mode configuration:
+```env
+VARASMS_TEST_MODE=true
 ```
 
 ## Usage
@@ -44,16 +55,71 @@ VARASMS_BASE_URL=https://messaging-service.co.tz
 ```php
 use VaraSMS\Laravel\Facades\VaraSMS;
 
-// Basic usage
+// Send to a single recipient
 $response = VaraSMS::sendSMS('255738234345', 'Hello World!');
 
-// With custom sender ID and reference
+// Send with custom sender ID and reference
 $response = VaraSMS::sendSMS(
     '255738234345',
     'Hello World!',
     'MYSENDER',
     'ref123'
 );
+
+// Send to multiple recipients
+$response = VaraSMS::sendSMS(
+    [
+        '255738234345',
+        '255716718040'
+    ],
+    'Hello everyone!',
+    'MYSENDER',
+    'ref123'
+);
+```
+
+The `sendSMS` method supports both single and multiple recipients:
+
+| Parameter | Description | Format/Constraints |
+|-----------|-------------|-------------------|
+| to | Single phone number or array of numbers | Must start with 255 followed by 9 digits |
+| message | The message to send | String |
+| senderId | Optional custom sender ID | String |
+| reference | Optional message reference | String |
+
+### Send SMS Response
+```php
+// Single recipient response
+[
+    'success' => true,
+    'message' => 'Message sent successfully',
+    'data' => [
+        'message_id' => '123456',
+        'to' => '255738234345',
+        'status' => 'SENT',
+        'reference' => 'ref123'
+    ]
+]
+
+// Multiple recipients response
+[
+    'success' => true,
+    'message' => 'Messages sent successfully',
+    'data' => [
+        [
+            'message_id' => '123456',
+            'to' => '255738234345',
+            'status' => 'SENT',
+            'reference' => 'ref123'
+        ],
+        [
+            'message_id' => '123457',
+            'to' => '255716718040',
+            'status' => 'SENT',
+            'reference' => 'ref123'
+        ]
+    ]
+]
 ```
 
 ### Send Bulk SMS
@@ -401,5 +467,68 @@ The `scheduleSMS` method supports both one-time and recurring message scheduling
         'start_date' => '2024-03-25',  // Only for recurring messages
         'end_date' => '2024-04-25'     // Only for recurring messages
     ]
+]
+```
+
+### Send Multiple Different Messages
+
+```php
+use VaraSMS\Laravel\Facades\VaraSMS;
+
+// Send different messages to different groups of recipients
+$response = VaraSMS::sendMultipleMessages([
+    [
+        'to' => [
+            '255716718040',
+            '255758483019'
+        ],
+        'text' => 'First message to group 1',
+        'from' => 'NEXTSMS'  // Optional sender ID
+    ],
+    [
+        'to' => [
+            '255758483019',
+            '255655912841',
+            '255716718040'
+        ],
+        'text' => 'Second message to group 2'
+        // Using default sender ID from config
+    ]
+], 'batch123');  // Optional global reference
+
+```
+
+The `sendMultipleMessages` method allows you to send different messages to different groups of recipients in a single API call:
+
+| Parameter | Description | Format/Constraints |
+|-----------|-------------|-------------------|
+| messages | Array of message objects | Each message must contain 'to' and 'text' |
+| reference | Optional global reference | String |
+
+Each message in the messages array should have:
+- `to`: Single phone number or array of numbers (must start with 255)
+- `text`: The message content
+- `from`: Optional sender ID (uses default if not provided)
+
+### Multiple Messages Response
+```php
+[
+    'success' => true,
+    'message' => 'Messages sent successfully',
+    'data' => [
+        [
+            'message_id' => '123456',
+            'to' => ['255716718040', '255758483019'],
+            'status' => 'SENT',
+            'text' => 'First message to group 1'
+        ],
+        [
+            'message_id' => '123457',
+            'to' => ['255758483019', '255655912841', '255716718040'],
+            'status' => 'SENT',
+            'text' => 'Second message to group 2'
+        ]
+    ],
+    'reference' => 'batch123'
 ]
 ``` 
